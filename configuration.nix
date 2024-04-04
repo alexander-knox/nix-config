@@ -11,6 +11,9 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+
 
   networking.hostName = "vespertine"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -74,16 +77,31 @@
     description = "ak";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
+      
+      #browsers
       firefox
-      ventoy-full
-      vscode
       brave
+
+      #coding
       github-desktop
-      gnome.gnome-tweaks
-      gnomeExtensions.gtk-title-bar
+      vscode
+      vscode-extensions.ms-python.python
+      vscode-extensions.golang.go
+      vscode-extensions.bbenoist.nix
+      vscode-extensions.mechatroner.rainbow-csv
+      vscode-extensions.davidanson.vscode-markdownlint
+
+      #cli-tools
+      kitty
+      kitty-themes
       fastfetch
+
+      #other
       gimp
       onlyoffice-bin_7_5
+      remmina
+      ventoy-full
+      etcher
     ];
   };
 
@@ -94,14 +112,31 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   
-  stdenv.cc.cc.lib
+  #cli-tools
   vim
   wget
   nvtop
-  btop  
+  btop
+
+  #coding
   git
   python3
+  poetry
   go
+
+  #desktop packages
+  gtk4
+  gnome.gnome-tweaks
+  gnome.gnome-themes-extra
+  whitesur-gtk-theme
+  whitesur-icon-theme
+  gnomeExtensions.gtk-title-bar
+  (catppuccin-gtk.override {
+    accents = [ "pink" ]; # You can specify multiple accents here to output multiple themes
+    size = "compact";
+    tweaks = [ "rimless" "black" ]; # You can also specify multiple tweaks here
+    variant = "mocha";
+  })
 
   ];
 
@@ -120,6 +155,12 @@
 
   system.stateVersion = "23.11"; # Before changing this value read the documentation for this option (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
 
+
+  # testing
+  qt.enable = true;
+  qt.platformTheme = "gtk2";
+  qt.style = "gtk2";
+
   # Nvidia Config
 
   hardware.nvidia.forceFullCompositionPipeline = true;
@@ -130,7 +171,7 @@
     driSupport32Bit = true;
   };
 
-  services.xserver.videoDrivers = ["nvidia"];
+  services.xserver.videoDrivers = lib.mkForce ["nvidia"];
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = false;
@@ -140,7 +181,6 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
     prime = {
       sync.enable = true;
-      
       nvidiaBusId = "PCI:1:0:0";
       intelBusId = "PCI:0:2:0";
     };
